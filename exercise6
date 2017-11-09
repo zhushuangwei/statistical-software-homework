@@ -1,0 +1,12 @@
+st<-Sys.time()
+a=b=c()
+a[1]=b[1]=0
+for(n in 2:26){
+    a[n]=2**n-(n+1)
+    b[n]=a[n-1]*choose(26,n)
+}
+which.max(b)#18
+max(b)#204717391450
+ed<-Sys.time()
+time<-ed-st
+time#0.019
