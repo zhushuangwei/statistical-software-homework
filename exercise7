@@ -1,0 +1,63 @@
+#install.packages("igraph")
+library(igraph)
+st<-Sys.time()
+m=1000
+x=matrix(c(m,  16, 12, 21, m,  m,  m,
+           16, m,  m,  17, 20, m,  m,
+           12, m,  m,  28, m,  31, m,
+           21, 17, 28, m,  18, 19, 23,
+           m,  20, m,  18, m,  m,  11,
+           m,  m,  31, 19, 23, m,  27,
+           m,  m,  m,  23, 11, 27, m),nrow = 7,byrow = T)
+getwd()
+setwd('/Users/zhushuangwei/Desktop')
+x=as.matrix(read.table('network.txt'))
+xd<-x
+N=nrow(x)
+yt=x
+yt[,]=0
+M=c()
+f=function(x,bzdata){
+    xz=bzdata
+    if (is.null(xz)){
+        flag=which(x==min(x),arr.ind = T)
+        nmin=min(x)
+    }else{
+        n=unique(xz[,1])
+        flag=which(x==min(x[n,-n]),arr.ind = T)#寻找剔除后的最小值
+        nmin=min(x[n,-n])
+    }
+    return (list(flag=flag,min=nmin))
+}#返回将要连接的边 
+bzdata=c()
+l_bzdata=bzdata#存储已经选择过的顶点编号
+i=1
+for (i in c(1:(N-1))){
+    bz=f(x,l_bzdata)
+    dq=bz$flag
+    du<-unique(dq[,1])
+    lu<-unique(l_bzdata[,1])
+    if (length(du)>2){
+        temp<-dq[dq[,1]==intersect(du,lu),]#在已连接的定点中寻找连接的边
+    }else{
+        temp=du
+    }
+    bzdata=cbind(temp,rev(temp))
+    M[i]=bz$min
+    x[bzdata]=m
+    yt[bzdata]=1#将相应的邻接矩阵元素设置为1
+    l_bzdata=rbind(l_bzdata,bzdata)
+}
+ed<-Sys.time()
+#yt 
+g=graph.adjacency(yt,mode="undirected",weighted="T")
+plot(g)
+xd[xd==max(xd)]=0
+g1=graph.adjacency(xd,mode="undirected",weighted="T")
+dev.new()
+plot(g1)
+time=ed-st
+time #0.05
+sum(M)#2153
+
+
